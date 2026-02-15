@@ -1,1 +1,1 @@
-Entrega de proyecto #2
+Carpeta de Entrega #2
