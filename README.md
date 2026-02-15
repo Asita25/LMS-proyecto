@@ -7,3 +7,6 @@
 
 ## Materia:
 Estándares de programación
+
+## Docente:
+Ing. Ruben Escobar Ortegon
