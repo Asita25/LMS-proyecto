@@ -1,0 +1,1578 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Edu MiniLMS</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    :root {
+      --primary: #1a2e44;
+      --accent: #f5a623;
+      --accent2: #2dce89;
+      --accent3: #e74c3c;
+      --bg: #f0f4f8;
+      --card: #ffffff;
+      --sidebar-w: 260px;
+      --text: #1a2e44;
+      --muted: #7f8c9a;
+      --border: #dde3ec;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--text); }
+
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    #screen-login {
+      min-height: 100vh;
+      display: none;
+      background: var(--primary);
+      position: relative;
+      overflow: hidden;
+    }
+    #screen-login.active { display: flex; }
+    .login-bg-shape {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(245,166,35,0.08);
+    }
+    .login-bg-shape.s1 { width: 600px; height: 600px; top: -200px; right: -150px; }
+    .login-bg-shape.s2 { width: 400px; height: 400px; bottom: -150px; left: -100px; background: rgba(45,206,137,0.07); }
+    .login-left {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 60px 80px;
+      position: relative;
+      z-index: 2;
+    }
+    .login-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 60px;
+    }
+    .login-brand .logo-box {
+      width: 44px; height: 44px;
+      background: var(--accent);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .login-brand .logo-box svg { width: 24px; height: 24px; fill: var(--primary); }
+    .login-brand span {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.6rem;
+      color: #fff;
+      letter-spacing: -0.5px;
+    }
+    .login-hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.2rem, 4vw, 3.5rem);
+      color: #fff;
+      line-height: 1.15;
+      margin-bottom: 20px;
+    }
+    .login-hero h1 em { color: var(--accent); font-style: normal; }
+    .login-hero p { color: rgba(255,255,255,0.55); font-size: 1.05rem; line-height: 1.7; max-width: 420px; }
+    .login-stats {
+      display: flex; gap: 40px; margin-top: 50px;
+    }
+    .stat-item .num {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem; color: var(--accent); font-weight: 900;
+    }
+    .stat-item .lbl { color: rgba(255,255,255,0.4); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+    .login-right {
+      width: 480px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+      position: relative;
+      z-index: 2;
+    }
+    .login-card {
+      background: var(--card);
+      border-radius: 24px;
+      padding: 48px 44px;
+      width: 100%;
+      box-shadow: 0 40px 80px rgba(0,0,0,0.25);
+    }
+    .login-card h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.9rem;
+      color: var(--primary);
+      margin-bottom: 6px;
+    }
+    .login-card .subtitle { color: var(--muted); font-size: 0.9rem; margin-bottom: 36px; }
+    .form-label { font-weight: 700; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted); margin-bottom: 6px; }
+    .form-control {
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.95rem;
+      color: var(--text);
+      transition: border-color 0.2s;
+    }
+    .form-control:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(245,166,35,0.12); outline: none; }
+    .form-select {
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.95rem;
+      color: var(--text);
+      transition: border-color 0.2s;
+    }
+    .form-select:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(245,166,35,0.12); outline: none; }
+    .btn-login {
+      width: 100%;
+      padding: 14px;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 800;
+      font-size: 1rem;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+      margin-top: 8px;
+    }
+    .btn-login:hover { background: #253d58; transform: translateY(-1px); }
+    .login-divider { text-align: center; color: var(--muted); font-size: 0.82rem; margin: 20px 0; position: relative; }
+    .login-divider::before, .login-divider::after {
+      content: ''; position: absolute; top: 50%; width: 40%; height: 1px; background: var(--border);
+    }
+    .login-divider::before { left: 0; }
+    .login-divider::after { right: 0; }
+    .role-pills { display: flex; gap: 8px; flex-wrap: wrap; }
+    .role-pill {
+      flex: 1; min-width: 80px;
+      padding: 10px 8px;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      text-align: center;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .role-pill:hover, .role-pill.active {
+      border-color: var(--accent);
+      background: rgba(245,166,35,0.08);
+      color: var(--primary);
+    }
+    .role-pill .icon { display: block; font-size: 1.3rem; margin-bottom: 4px; }
+
+    #screen-app {
+      min-height: 100vh;
+      display: none;
+    }
+    #screen-app.active { display: flex; }
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--primary);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0;
+      z-index: 100;
+      transition: transform 0.3s;
+    }
+    .sidebar-brand {
+      display: flex; align-items: center; gap: 10px;
+      padding: 28px 24px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .sidebar-brand .logo-box {
+      width: 36px; height: 36px;
+      background: var(--accent);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .sidebar-brand .logo-box svg { width: 20px; height: 20px; fill: var(--primary); }
+    .sidebar-brand span {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.2rem;
+      color: #fff;
+    }
+    .sidebar-user {
+      padding: 20px 24px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      display: flex; align-items: center; gap: 12px;
+    }
+    .user-avatar {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 0.9rem; color: var(--primary);
+      flex-shrink: 0;
+    }
+    .user-info .name { color: #fff; font-weight: 700; font-size: 0.88rem; }
+    .user-info .role-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 2px;
+    }
+    .role-admin { background: rgba(245,166,35,0.2); color: var(--accent); }
+    .role-docente { background: rgba(45,206,137,0.2); color: var(--accent2); }
+    .role-estudiante { background: rgba(99,179,237,0.2); color: #63b3ed; }
+    .sidebar-nav { flex: 1; padding: 16px 0; overflow-y: auto; }
+    .nav-section-label {
+      padding: 12px 24px 6px;
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: rgba(255,255,255,0.3);
+      font-weight: 700;
+    }
+    .nav-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 11px 24px;
+      color: rgba(255,255,255,0.5);
+      cursor: pointer;
+      border-radius: 0;
+      transition: all 0.2s;
+      font-size: 0.9rem;
+      font-weight: 600;
+      position: relative;
+      border-left: 3px solid transparent;
+      text-decoration: none;
+    }
+    .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+    .nav-item:hover { color: rgba(255,255,255,0.85); background: rgba(255,255,255,0.05); }
+    .nav-item.active {
+      color: #fff;
+      background: rgba(245,166,35,0.1);
+      border-left-color: var(--accent);
+    }
+    .nav-item .badge {
+      margin-left: auto;
+      background: var(--accent);
+      color: var(--primary);
+      font-size: 0.65rem;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 20px;
+    }
+    .sidebar-footer {
+      padding: 16px 24px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+    .btn-logout {
+      display: flex; align-items: center; gap: 10px;
+      width: 100%;
+      padding: 11px 16px;
+      border: 2px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      background: transparent;
+      color: rgba(255,255,255,0.5);
+      font-family: 'Nunito', sans-serif;
+      font-weight: 700;
+      font-size: 0.88rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-logout svg { width: 16px; height: 16px; }
+    .btn-logout:hover { border-color: rgba(255,255,255,0.3); color: rgba(255,255,255,0.85); background: rgba(255,255,255,0.05); }
+    .main-content {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .topbar {
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky; top: 0; z-index: 50;
+    }
+    .topbar-left h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+      color: var(--primary);
+    }
+    .topbar-left p { font-size: 0.82rem; color: var(--muted); margin-top: 1px; }
+    .topbar-right { display: flex; align-items: center; gap: 12px; }
+    .topbar-btn {
+      width: 38px; height: 38px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: transparent;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+    }
+    .topbar-btn svg { width: 18px; height: 18px; stroke: var(--muted); }
+    .topbar-btn:hover { background: var(--bg); border-color: var(--accent); }
+    .topbar-btn .dot {
+      width: 7px; height: 7px;
+      background: var(--accent);
+      border-radius: 50%;
+      position: absolute; top: 6px; right: 6px;
+      border: 1.5px solid white;
+    }
+    .page { display: none; padding: 32px; }
+    .page.active { display: block; }
+
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; margin-bottom: 28px; }
+    .stat-card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 24px;
+      border: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .stat-card:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(0,0,0,0.08); }
+    .stat-card .sc-icon {
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 16px;
+    }
+    .stat-card .sc-icon svg { width: 22px; height: 22px; }
+    .stat-card .sc-value {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      font-weight: 900;
+      color: var(--primary);
+      line-height: 1;
+    }
+    .stat-card .sc-label { font-size: 0.82rem; color: var(--muted); margin-top: 4px; font-weight: 600; }
+    .stat-card .sc-trend {
+      font-size: 0.75rem;
+      font-weight: 700;
+      margin-top: 10px;
+      display: flex; align-items: center; gap: 4px;
+    }
+    .trend-up { color: var(--accent2); }
+    .trend-info { color: #63b3ed; }
+    .sc-accent-bar {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 3px;
+      border-radius: 0 0 16px 16px;
+    }
+
+    .content-card {
+      background: var(--card);
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+    .content-card .cc-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .content-card .cc-header h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      color: var(--primary);
+    }
+    .content-card .cc-body { padding: 24px; }
+
+    .btn-primary-custom {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 20px;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 700;
+      font-size: 0.88rem;
+      cursor: pointer;
+      display: inline-flex; align-items: center; gap: 8px;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+    .btn-primary-custom svg { width: 16px; height: 16px; }
+    .btn-primary-custom:hover { background: #253d58; transform: translateY(-1px); color: #fff; }
+    .btn-accent-custom {
+      background: var(--accent);
+      color: var(--primary);
+      border: none;
+      border-radius: 10px;
+      padding: 10px 20px;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 800;
+      font-size: 0.88rem;
+      cursor: pointer;
+      display: inline-flex; align-items: center; gap: 8px;
+      transition: all 0.2s;
+    }
+    .btn-accent-custom:hover { background: #e09520; transform: translateY(-1px); }
+    .btn-sm-custom {
+      padding: 6px 14px;
+      font-size: 0.8rem;
+      border-radius: 8px;
+    }
+    .btn-ghost {
+      background: transparent;
+      border: 1.5px solid var(--border);
+      color: var(--muted);
+      border-radius: 10px;
+      padding: 10px 18px;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 700;
+      font-size: 0.88rem;
+      cursor: pointer;
+      display: inline-flex; align-items: center; gap: 8px;
+      transition: all 0.2s;
+    }
+    .btn-ghost:hover { border-color: var(--primary); color: var(--primary); }
+
+    .custom-table { width: 100%; border-collapse: collapse; }
+    .custom-table th {
+      text-align: left;
+      padding: 12px 16px;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+      font-weight: 700;
+      border-bottom: 2px solid var(--border);
+    }
+    .custom-table td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.9rem;
+      vertical-align: middle;
+    }
+    .custom-table tr:last-child td { border-bottom: none; }
+    .custom-table tbody tr:hover { background: rgba(0,0,0,0.02); }
+
+    .chip {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .chip-green { background: rgba(45,206,137,0.12); color: #1a9a6a; }
+    .chip-amber { background: rgba(245,166,35,0.15); color: #b37a00; }
+    .chip-blue { background: rgba(99,179,237,0.15); color: #2a7ab5; }
+    .chip-red { background: rgba(231,76,60,0.12); color: #c0392b; }
+    .chip-gray { background: rgba(127,140,154,0.12); color: var(--muted); }
+
+    .courses-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+    .course-card {
+      background: var(--card);
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .course-card:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,0.1); }
+    .course-card .cc-banner {
+      height: 90px;
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .cc-banner-pattern {
+      position: absolute; inset: 0;
+      opacity: 0.15;
+      background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,0.3) 10px, rgba(255,255,255,0.3) 20px);
+    }
+    .cc-banner-icon { position: relative; z-index: 1; }
+    .cc-banner-icon svg { width: 40px; height: 40px; stroke: rgba(255,255,255,0.9); fill: none; }
+    .course-card .cc-content { padding: 20px; }
+    .course-card .cc-content h4 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.05rem;
+      color: var(--primary);
+      margin-bottom: 6px;
+    }
+    .course-card .cc-meta { font-size: 0.8rem; color: var(--muted); font-weight: 600; }
+    .progress-bar-custom {
+      height: 5px;
+      background: var(--border);
+      border-radius: 10px;
+      margin-top: 14px;
+      overflow: hidden;
+    }
+    .progress-fill { height: 100%; border-radius: 10px; transition: width 0.6s ease; }
+
+    .form-section {
+      background: var(--card);
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      padding: 28px;
+      margin-bottom: 20px;
+    }
+    .form-section h4 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      color: var(--primary);
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .form-group { margin-bottom: 20px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+    .activity-item {
+      display: flex; gap: 14px; align-items: flex-start;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .activity-item:last-child { border-bottom: none; }
+    .activity-dot {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .activity-dot svg { width: 16px; height: 16px; }
+    .activity-text { font-size: 0.88rem; color: var(--text); line-height: 1.5; }
+    .activity-text strong { color: var(--primary); }
+    .activity-time { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+
+    .grade-pill {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+
+    .notif-dropdown {
+      position: absolute;
+      top: 48px; right: 0;
+      width: 320px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.12);
+      z-index: 200;
+      display: none;
+    }
+    .notif-dropdown.open { display: block; }
+    .notif-header { padding: 16px 20px; border-bottom: 1px solid var(--border); font-weight: 700; font-size: 0.9rem; }
+    .notif-item { padding: 14px 20px; border-bottom: 1px solid var(--border); display: flex; gap: 12px; align-items: flex-start; cursor: pointer; }
+    .notif-item:hover { background: var(--bg); }
+    .notif-item:last-child { border-bottom: none; }
+    .notif-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); flex-shrink: 0; margin-top: 5px; }
+    .notif-text { font-size: 0.83rem; color: var(--text); line-height: 1.4; }
+    .notif-when { font-size: 0.73rem; color: var(--muted); margin-top: 2px; }
+
+    /* ====== RESPONSIVE ====== */
+    .hamburger-btn {
+      display: none;
+      background: none; border: none; cursor: pointer; padding: 8px;
+    }
+    .hamburger-btn svg { width: 24px; height: 24px; stroke: var(--primary); }
+    .sidebar-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 99;
+    }
+
+    @media (max-width: 900px) {
+      .login-left { display: none; }
+      .login-right { width: 100%; }
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.open { transform: translateX(0); }
+      .sidebar-overlay.open { display: block; }
+      .main-content { margin-left: 0; }
+      .hamburger-btn { display: flex; }
+      .page { padding: 20px; }
+      .form-row { grid-template-columns: 1fr; }
+      .topbar { padding: 14px 20px; }
+    }
+    @media (max-width: 576px) {
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+      .courses-grid { grid-template-columns: 1fr; }
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .fade-up { animation: fadeUp 0.4s ease forwards; }
+    .fade-up-d1 { animation-delay: 0.05s; opacity: 0; }
+    .fade-up-d2 { animation-delay: 0.1s; opacity: 0; }
+    .fade-up-d3 { animation-delay: 0.15s; opacity: 0; }
+    .fade-up-d4 { animation-delay: 0.2s; opacity: 0; }
+
+    /* ====== MODAL ====== */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 300;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(3px);
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-box {
+      background: var(--card);
+      border-radius: 20px;
+      padding: 36px;
+      width: 100%;
+      max-width: 500px;
+      box-shadow: 0 40px 80px rgba(0,0,0,0.2);
+      animation: fadeUp 0.3s ease;
+    }
+    .modal-box h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+      color: var(--primary);
+      margin-bottom: 6px;
+    }
+    .modal-box .modal-sub { color: var(--muted); font-size: 0.85rem; margin-bottom: 24px; }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
+  </style>
+</head>
+<body>
+
+<!-- ===================== LOGIN SCREEN ===================== -->
+<div id="screen-login" class="screen active">
+  <div class="login-bg-shape s1"></div>
+  <div class="login-bg-shape s2"></div>
+
+  <div class="login-left">
+    <div class="login-brand">
+      <div class="logo-box">
+        <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+      </div>
+      <span>MiniLMS</span>
+    </div>
+    <div class="login-hero">
+      <h1>Aprende sin<br/><em>limites.</em><br/>Enseña con propósito.</h1>
+      <p>Plataforma de gestión de aprendizaje para instituciones modernas. Cursos, evaluaciones y seguimiento en un solo lugar.</p>
+    </div>
+    <div class="login-stats">
+      <div class="stat-item">
+        <div class="num">6</div>
+        <div class="lbl">Personas</div>
+      </div>
+      <div class="stat-item">
+        <div class="num">3</div>
+        <div class="lbl">Roles</div>
+      </div>
+      <div class="stat-item">
+        <div class="num">100%</div>
+        <div class="lbl">Web</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="login-right">
+    <div class="login-card">
+      <h2>Bienvenido</h2>
+      <p class="subtitle">Ingresa a tu cuenta para continuar</p>
+
+      <div class="form-group mb-3">
+        <label class="form-label">Selecciona tu rol</label>
+        <div class="role-pills" id="rolePills">
+          <div class="role-pill active" data-role="admin" onclick="selectRole(this)">
+            <span class="icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+            </span>
+            Admin
+          </div>
+          <div class="role-pill" data-role="docente" onclick="selectRole(this)">
+            <span class="icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+            </span>
+            Docente
+          </div>
+          <div class="role-pill" data-role="estudiante" onclick="selectRole(this)">
+            <span class="icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+            </span>
+            Estudiante
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group mb-3">
+        <label class="form-label" for="loginEmail">Correo electrónico</label>
+        <input type="email" class="form-control" id="loginEmail" placeholder="correo@ejemplo.com" />
+      </div>
+
+      <div class="form-group mb-1">
+        <label class="form-label" for="loginPass">Contraseña</label>
+        <input type="password" class="form-control" id="loginPass" placeholder="Tu contraseña" />
+      </div>
+
+      <div class="d-flex justify-content-end mb-3 mt-1">
+        <a href="#" style="font-size:0.82rem; color:var(--accent); text-decoration:none; font-weight:700;">Olvide mi contraseña</a>
+      </div>
+
+      <button class="btn-login" onclick="doLogin()">Ingresar al sistema</button>
+
+      <div class="login-divider mt-3">o</div>
+
+      <div class="text-center" style="font-size:0.85rem; color:var(--muted);">
+        No tienes cuenta?
+        <a href="#" style="color:var(--primary); font-weight:700; text-decoration:none;" onclick="showRegisterModal()"> Registrarse</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== APP SCREEN ===================== -->
+<div id="screen-app" class="screen">
+
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="logo-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="none"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" fill="currentColor"/></svg>
+      </div>
+      <span>MiniLMS</span>
+    </div>
+
+    <div class="sidebar-user">
+      <div class="user-avatar" id="sidebarAvatar" style="background: var(--accent);">AD</div>
+      <div class="user-info">
+        <div class="name" id="sidebarName">Admin General</div>
+        <span class="role-badge role-admin" id="sidebarRoleBadge">Admin</span>
+      </div>
+    </div>
+
+    <div class="sidebar-nav" id="sidebarNav">
+    </div>
+
+    <div class="sidebar-footer">
+      <button class="btn-logout" onclick="doLogout()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Cerrar sesión
+      </button>
+    </div>
+  </nav>
+
+  <div class="main-content">
+    <div class="topbar">
+      <div class="d-flex align-items-center gap-3">
+        <button class="hamburger-btn" onclick="toggleSidebar()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div class="topbar-left">
+          <h2 id="topbarTitle">Panel Principal</h2>
+          <p id="topbarSub">Miercoles, 13 de Mayo 2026</p>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div style="position:relative;">
+          <button class="topbar-btn" onclick="toggleNotif()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+            <span class="dot"></span>
+          </button>
+          <div class="notif-dropdown" id="notifDropdown">
+            <div class="notif-header">Notificaciones (3)</div>
+            <div class="notif-item">
+              <div class="notif-dot"></div>
+              <div>
+                <div class="notif-text">Nueva tarea entregada en <strong>Matematicas II</strong></div>
+                <div class="notif-when">Hace 5 min</div>
+              </div>
+            </div>
+            <div class="notif-item">
+              <div class="notif-dot"></div>
+              <div>
+                <div class="notif-text">Calificación publicada en <strong>Fisica I</strong></div>
+                <div class="notif-when">Hace 2 horas</div>
+              </div>
+            </div>
+            <div class="notif-item">
+              <div class="notif-dot" style="background:#63b3ed;"></div>
+              <div>
+                <div class="notif-text">Nuevo estudiante registrado: <strong>Carlos M.</strong></div>
+                <div class="notif-when">Ayer</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="width:36px;height:36px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.8rem;color:var(--primary);" id="topbarAvatar">AD</div>
+      </div>
+    </div>
+
+    <!-- ===== PAGES ===== -->
+
+    <!-- DASHBOARD PAGE -->
+    <div class="page active" id="page-dashboard">
+      <div class="stats-grid fade-up fade-up-d1">
+      </div>
+      <div class="row g-4">
+        <div class="col-lg-8 fade-up fade-up-d2">
+          <div class="content-card">
+            <div class="cc-header">
+              <h3>Actividad Reciente</h3>
+              <button class="btn-ghost btn-sm-custom">Ver todo</button>
+            </div>
+            <div class="cc-body">
+              <div class="activity-item">
+                <div class="activity-dot" style="background:rgba(45,206,137,0.12);">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="#2dce89" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+                <div>
+                  <div class="activity-text"><strong>Maria Lopez</strong> entrego tarea "Derivadas parciales"</div>
+                  <div class="activity-time">Hace 12 minutos</div>
+                </div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-dot" style="background:rgba(245,166,35,0.12);">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="#f5a623" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                </div>
+                <div>
+                  <div class="activity-text">Curso <strong>Programacion Web</strong> fue creado</div>
+                  <div class="activity-time">Hace 1 hora</div>
+                </div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-dot" style="background:rgba(99,179,237,0.15);">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="#63b3ed" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                </div>
+                <div>
+                  <div class="activity-text"><strong>Jorge Perez</strong> se registro como estudiante</div>
+                  <div class="activity-time">Hace 3 horas</div>
+                </div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-dot" style="background:rgba(231,76,60,0.1);">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                </div>
+                <div>
+                  <div class="activity-text">Evaluacion <strong>Examen Final Quimica</strong> publicada</div>
+                  <div class="activity-time">Hace 5 horas</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-4 fade-up fade-up-d3">
+          <div class="content-card h-100">
+            <div class="cc-header">
+              <h3>Cursos Activos</h3>
+            </div>
+            <div class="cc-body p-3">
+              <div id="quickCourseList"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- USUARIOS PAGE -->
+    <div class="page" id="page-usuarios">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h3 style="font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--primary);">Gestión de Usuarios</h3>
+          <p style="color:var(--muted);font-size:0.85rem;">Administra todos los usuarios del sistema</p>
+        </div>
+        <button class="btn-primary-custom" onclick="openModal('modal-newuser')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Nuevo Usuario
+        </button>
+      </div>
+      <div class="content-card">
+        <div class="cc-header">
+          <div style="display:flex;gap:10px;align-items:center;">
+            <input type="text" class="form-control" placeholder="Buscar usuario..." style="max-width:240px;padding:8px 14px;">
+            <select class="form-select" style="max-width:160px;padding:8px 14px;">
+              <option>Todos los roles</option>
+              <option>Admin</option>
+              <option>Docente</option>
+              <option>Estudiante</option>
+            </select>
+          </div>
+          <span style="font-size:0.82rem;color:var(--muted);">12 usuarios</span>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>Usuario</th>
+                <th>Correo</th>
+                <th>Rol</th>
+                <th>Estado</th>
+                <th>Registro</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><div style="display:flex;align-items:center;gap:10px;"><div style="width:34px;height:34px;border-radius:50%;background:rgba(245,166,35,0.15);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.78rem;color:#b37a00;">ML</div><span style="font-weight:700;">Maria Lopez</span></div></td>
+                <td style="color:var(--muted);">m.lopez@edu.com</td>
+                <td><span class="chip chip-blue">Docente</span></td>
+                <td><span class="chip chip-green">Activo</span></td>
+                <td style="color:var(--muted);font-size:0.82rem;">02 Ene 2026</td>
+                <td>
+                  <div style="display:flex;gap:6px;">
+                    <button class="btn-ghost btn-sm-custom">Editar</button>
+                    <button class="btn-sm-custom" style="background:rgba(231,76,60,0.08);color:#c0392b;border:none;border-radius:8px;padding:6px 12px;font-size:0.8rem;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;">Eliminar</button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td><div style="display:flex;align-items:center;gap:10px;"><div style="width:34px;height:34px;border-radius:50%;background:rgba(45,206,137,0.12);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.78rem;color:#1a9a6a;">JP</div><span style="font-weight:700;">Jorge Perez</span></div></td>
+                <td style="color:var(--muted);">j.perez@edu.com</td>
+                <td><span class="chip chip-green">Estudiante</span></td>
+                <td><span class="chip chip-green">Activo</span></td>
+                <td style="color:var(--muted);font-size:0.82rem;">15 Ene 2026</td>
+                <td>
+                  <div style="display:flex;gap:6px;">
+                    <button class="btn-ghost btn-sm-custom">Editar</button>
+                    <button class="btn-sm-custom" style="background:rgba(231,76,60,0.08);color:#c0392b;border:none;border-radius:8px;padding:6px 12px;font-size:0.8rem;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;">Eliminar</button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td><div style="display:flex;align-items:center;gap:10px;"><div style="width:34px;height:34px;border-radius:50%;background:rgba(99,179,237,0.15);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.78rem;color:#2a7ab5;">AG</div><span style="font-weight:700;">Ana Garcia</span></div></td>
+                <td style="color:var(--muted);">a.garcia@edu.com</td>
+                <td><span class="chip chip-amber">Admin</span></td>
+                <td><span class="chip chip-amber">Inactivo</span></td>
+                <td style="color:var(--muted);font-size:0.82rem;">20 Feb 2026</td>
+                <td>
+                  <div style="display:flex;gap:6px;">
+                    <button class="btn-ghost btn-sm-custom">Editar</button>
+                    <button class="btn-sm-custom" style="background:rgba(231,76,60,0.08);color:#c0392b;border:none;border-radius:8px;padding:6px 12px;font-size:0.8rem;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;">Eliminar</button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- CURSOS PAGE -->
+    <div class="page" id="page-cursos">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h3 style="font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--primary);">Cursos</h3>
+          <p style="color:var(--muted);font-size:0.85rem;">Gestiona todos los cursos de la plataforma</p>
+        </div>
+        <button class="btn-accent-custom" onclick="openModal('modal-newcourse')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Nuevo Curso
+        </button>
+      </div>
+      <div class="courses-grid" id="courseGrid">
+      </div>
+    </div>
+
+    <div class="page" id="page-tareas">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h3 style="font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--primary);">Tareas y Evaluaciones</h3>
+          <p style="color:var(--muted);font-size:0.85rem;">Revisa entregas y calificaciones pendientes</p>
+        </div>
+        <button class="btn-primary-custom" onclick="openModal('modal-newtask')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Nueva Tarea
+        </button>
+      </div>
+      <div class="content-card">
+        <div class="cc-header">
+          <h3>Entregas Recientes</h3>
+          <select class="form-select" style="max-width:180px;padding:7px 12px;font-size:0.85rem;">
+            <option>Todos los cursos</option>
+            <option>Matematicas II</option>
+            <option>Fisica I</option>
+            <option>Programacion Web</option>
+          </select>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>Tarea / Evaluacion</th>
+                <th>Estudiante</th>
+                <th>Curso</th>
+                <th>Entrega</th>
+                <th>Estado</th>
+                <th>Nota</th>
+                <th>Accion</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span style="font-weight:700;">Derivadas Parciales</span><br><small style="color:var(--muted);">Tarea</small></td>
+                <td>Maria Lopez</td>
+                <td><span class="chip chip-blue">Matematicas II</span></td>
+                <td style="color:var(--muted);font-size:0.82rem;">13 May 2026</td>
+                <td><span class="chip chip-green">Entregada</span></td>
+                <td><span class="grade-pill" style="color:var(--accent2);">—</span></td>
+                <td><button class="btn-accent-custom btn-sm-custom">Calificar</button></td>
+              </tr>
+              <tr>
+                <td><span style="font-weight:700;">Examen Parcial</span><br><small style="color:var(--muted);">Evaluacion</small></td>
+                <td>Jorge Perez</td>
+                <td><span class="chip chip-amber">Fisica I</span></td>
+                <td style="color:var(--muted);font-size:0.82rem;">10 May 2026</td>
+                <td><span class="chip chip-green">Entregada</span></td>
+                <td><span class="grade-pill" style="color:#2a7ab5;">8.5</span></td>
+                <td><button class="btn-ghost btn-sm-custom">Ver</button></td>
+              </tr>
+              <tr>
+                <td><span style="font-weight:700;">Lab HTML/CSS</span><br><small style="color:var(--muted);">Tarea</small></td>
+                <td>Carlos Mendez</td>
+                <td><span class="chip chip-green">Prog. Web</span></td>
+                <td style="color:var(--muted);font-size:0.82rem;">—</td>
+                <td><span class="chip chip-red">Pendiente</span></td>
+                <td><span class="grade-pill" style="color:var(--muted);">—</span></td>
+                <td><button class="btn-ghost btn-sm-custom">Recordar</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="page" id="page-notas">
+      <div class="mb-4">
+        <h3 style="font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--primary);">Reporte de Notas</h3>
+        <p style="color:var(--muted);font-size:0.85rem;">Calificaciones por estudiante y curso</p>
+      </div>
+      <div class="content-card">
+        <div class="cc-header">
+          <div style="display:flex;gap:10px;">
+            <select class="form-select" style="max-width:200px;padding:7px 12px;font-size:0.85rem;">
+              <option>Matematicas II</option>
+              <option>Fisica I</option>
+              <option>Programacion Web</option>
+            </select>
+          </div>
+          <button class="btn-ghost btn-sm-custom">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Exportar
+          </button>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>Estudiante</th>
+                <th>Tarea 1</th>
+                <th>Tarea 2</th>
+                <th>Parcial</th>
+                <th>Final</th>
+                <th>Promedio</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><div style="display:flex;align-items:center;gap:10px;"><div style="width:32px;height:32px;border-radius:50%;background:rgba(245,166,35,0.15);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.75rem;color:#b37a00;">ML</div><span style="font-weight:700;">Maria Lopez</span></div></td>
+                <td><span class="grade-pill" style="color:var(--accent2);">9.0</span></td>
+                <td><span class="grade-pill" style="color:var(--accent2);">8.5</span></td>
+                <td><span class="grade-pill" style="color:#2a7ab5;">7.8</span></td>
+                <td><span class="grade-pill" style="color:var(--muted);">—</span></td>
+                <td><span class="grade-pill" style="font-size:1.2rem;color:var(--accent2);">8.4</span></td>
+                <td><span class="chip chip-green">Aprobado</span></td>
+              </tr>
+              <tr>
+                <td><div style="display:flex;align-items:center;gap:10px;"><div style="width:32px;height:32px;border-radius:50%;background:rgba(45,206,137,0.12);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.75rem;color:#1a9a6a;">JP</div><span style="font-weight:700;">Jorge Perez</span></div></td>
+                <td><span class="grade-pill" style="color:#e67e22;">6.0</span></td>
+                <td><span class="grade-pill" style="color:var(--accent2);">7.5</span></td>
+                <td><span class="grade-pill" style="color:var(--accent2);">8.5</span></td>
+                <td><span class="grade-pill" style="color:var(--muted);">—</span></td>
+                <td><span class="grade-pill" style="font-size:1.2rem;color:#2a7ab5;">7.3</span></td>
+                <td><span class="chip chip-green">Aprobado</span></td>
+              </tr>
+              <tr>
+                <td><div style="display:flex;align-items:center;gap:10px;"><div style="width:32px;height:32px;border-radius:50%;background:rgba(99,179,237,0.15);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.75rem;color:#2a7ab5;">CM</div><span style="font-weight:700;">Carlos Mendez</span></div></td>
+                <td><span class="grade-pill" style="color:#c0392b;">4.0</span></td>
+                <td><span class="grade-pill" style="color:#c0392b;">3.5</span></td>
+                <td><span class="grade-pill" style="color:#e67e22;">5.0</span></td>
+                <td><span class="grade-pill" style="color:var(--muted);">—</span></td>
+                <td><span class="grade-pill" style="font-size:1.2rem;color:#c0392b;">4.2</span></td>
+                <td><span class="chip chip-red">Reprobado</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="page" id="page-perfil">
+      <div class="row g-4">
+        <div class="col-md-4">
+          <div class="content-card text-center" style="padding:32px;">
+            <div style="width:80px;height:80px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:2rem;font-weight:900;color:var(--primary);margin:0 auto 16px;">AD</div>
+            <h4 style="font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--primary);" id="profileName">Admin General</h4>
+            <span class="chip chip-amber mt-2 mb-3 d-inline-block" id="profileRole">Admin</span>
+            <p style="color:var(--muted);font-size:0.85rem;">admin@educore.com</p>
+            <hr style="border-color:var(--border);margin:20px 0;">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;text-align:center;">
+              <div>
+                <div style="font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--primary);" id="profileStat1">12</div>
+                <div style="font-size:0.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;" id="profileStat1Label">Usuarios</div>
+              </div>
+              <div>
+                <div style="font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--primary);">5</div>
+                <div style="font-size:0.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;">Cursos</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-8">
+          <div class="form-section">
+            <h4>Editar Perfil</h4>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Nombre completo</label>
+                <input type="text" class="form-control" value="Admin General" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Correo</label>
+                <input type="email" class="form-control" value="admin@educore.com" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Nueva contrasena</label>
+                <input type="password" class="form-control" placeholder="Nueva contrasena" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Confirmar contrasena</label>
+                <input type="password" class="form-control" placeholder="Repite la contrasena" />
+              </div>
+            </div>
+            <button class="btn-primary-custom">Guardar cambios</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===================== MODALS ===================== -->
+
+<div class="modal-overlay" id="modal-newuser">
+  <div class="modal-box">
+    <h3>Nuevo Usuario</h3>
+    <p class="modal-sub">Completa los datos para registrar el usuario</p>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Nombre completo</label>
+        <input type="text" class="form-control" placeholder="Nombre y apellido" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Correo electronico</label>
+        <input type="email" class="form-control" placeholder="correo@edu.com" />
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Contrasena</label>
+        <input type="password" class="form-control" placeholder="Contrasena inicial" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Rol</label>
+        <select class="form-select">
+          <option>Estudiante</option>
+          <option>Docente</option>
+          <option>Admin</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeModal('modal-newuser')">Cancelar</button>
+      <button class="btn-primary-custom" onclick="closeModal('modal-newuser')">Crear Usuario</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-newcourse">
+  <div class="modal-box">
+    <h3>Nuevo Curso</h3>
+    <p class="modal-sub">Completa la información del curso</p>
+    <div class="form-group">
+      <label class="form-label">Nombre del curso</label>
+      <input type="text" class="form-control" placeholder="Ej: Matematicas II" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Descripcion</label>
+      <textarea class="form-control" rows="3" placeholder="Describe brevemente el curso..."></textarea>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Docente asignado</label>
+        <select class="form-select">
+          <option>Maria Lopez</option>
+          <option>Carlos Ruiz</option>
+          <option>Ana Garcia</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Color de tema</label>
+        <select class="form-select">
+          <option value="#1a2e44">Azul marino</option>
+          <option value="#2dce89">Verde esmeralda</option>
+          <option value="#f5a623">Ambar</option>
+          <option value="#e74c3c">Rojo</option>
+          <option value="#8e44ad">Violeta</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeModal('modal-newcourse')">Cancelar</button>
+      <button class="btn-accent-custom" onclick="closeModal('modal-newcourse')">Crear Curso</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-newtask">
+  <div class="modal-box">
+    <h3>Nueva Tarea</h3>
+    <p class="modal-sub">Define los detalles de la tarea o evaluacion</p>
+    <div class="form-group">
+      <label class="form-label">Titulo</label>
+      <input type="text" class="form-control" placeholder="Ej: Examen Parcial Unidad 2" />
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Tipo</label>
+        <select class="form-select">
+          <option>Tarea</option>
+          <option>Evaluacion</option>
+          <option>Proyecto</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Curso</label>
+        <select class="form-select">
+          <option>Matematicas II</option>
+          <option>Fisica I</option>
+          <option>Programacion Web</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Fecha de entrega</label>
+        <input type="date" class="form-control" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Puntaje maximo</label>
+        <input type="number" class="form-control" placeholder="100" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Instrucciones</label>
+      <textarea class="form-control" rows="3" placeholder="Describe las instrucciones..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeModal('modal-newtask')">Cancelar</button>
+      <button class="btn-primary-custom" onclick="closeModal('modal-newtask')">Publicar Tarea</button>
+    </div>
+  </div>
+</div>
+
+<!-- Registro -->
+<div class="modal-overlay" id="modal-register">
+  <div class="modal-box">
+    <h3>Crear Cuenta</h3>
+    <p class="modal-sub">Registrate para acceder a la plataforma</p>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Nombre</label>
+        <input type="text" class="form-control" placeholder="Tu nombre" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Apellido</label>
+        <input type="text" class="form-control" placeholder="Tu apellido" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Correo electronico</label>
+      <input type="email" class="form-control" placeholder="correo@ejemplo.com" />
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Contrasena</label>
+        <input type="password" class="form-control" placeholder="Minimo 8 caracteres" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Confirmar</label>
+        <input type="password" class="form-control" placeholder="Repetir contrasena" />
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeModal('modal-register')">Cancelar</button>
+      <button class="btn-primary-custom" onclick="closeModal('modal-register')">Registrarme</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let currentRole = 'admin';
+
+  const ROLES_CONFIG = {
+    admin: {
+      name: 'Admin General',
+      initials: 'AD',
+      avatarColor: '#f5a623',
+      badgeClass: 'role-admin',
+      badgeText: 'Admin',
+      title: 'Panel de Administracion',
+      sub: 'Miercoles, 13 de Mayo 2026',
+      stats: [
+        { icon: usersIcon(), value: '12', label: 'Usuarios Activos', trend: '+2 este mes', trendClass: 'trend-up', bar: '#f5a623' },
+        { icon: bookIcon(), value: '5', label: 'Cursos Activos', trend: '3 en progreso', trendClass: 'trend-info', bar: '#63b3ed' },
+        { icon: taskIcon(), value: '8', label: 'Tareas Pendientes', trend: 'Por calificar', trendClass: 'trend-up', bar: '#2dce89' },
+        { icon: chartIcon(), value: '7.6', label: 'Promedio General', trend: 'Ultimo periodo', trendClass: 'trend-info', bar: '#8e44ad' },
+      ],
+      nav: [
+        { id: 'dashboard', label: 'Panel Principal', icon: homeIcon() },
+        { id: 'usuarios', label: 'Usuarios', icon: usersIcon(), badge: '12' },
+        { id: 'cursos', label: 'Cursos', icon: bookIcon() },
+        { id: 'tareas', label: 'Tareas y Evaluaciones', icon: taskIcon(), badge: '3' },
+        { id: 'notas', label: 'Notas', icon: chartIcon() },
+        { id: 'perfil', label: 'Mi Perfil', icon: profileIcon() },
+      ]
+    },
+    docente: {
+      name: 'Prof. Carlos Ruiz',
+      initials: 'CR',
+      avatarColor: '#2dce89',
+      badgeClass: 'role-docente',
+      badgeText: 'Docente',
+      title: 'Panel Docente',
+      sub: 'Miercoles, 13 de Mayo 2026',
+      stats: [
+        { icon: bookIcon(), value: '3', label: 'Mis Cursos', trend: 'Este semestre', trendClass: 'trend-info', bar: '#63b3ed' },
+        { icon: usersIcon(), value: '28', label: 'Estudiantes', trend: 'En total', trendClass: 'trend-up', bar: '#2dce89' },
+        { icon: taskIcon(), value: '5', label: 'Por Calificar', trend: 'Entregas recientes', trendClass: 'trend-up', bar: '#f5a623' },
+        { icon: chartIcon(), value: '8.1', label: 'Promedio Clase', trend: 'Matematicas II', trendClass: 'trend-info', bar: '#8e44ad' },
+      ],
+      nav: [
+        { id: 'dashboard', label: 'Mi Panel', icon: homeIcon() },
+        { id: 'cursos', label: 'Mis Cursos', icon: bookIcon() },
+        { id: 'tareas', label: 'Tareas', icon: taskIcon(), badge: '5' },
+        { id: 'notas', label: 'Calificaciones', icon: chartIcon() },
+        { id: 'perfil', label: 'Mi Perfil', icon: profileIcon() },
+      ]
+    },
+    estudiante: {
+      name: 'Jorge Perez',
+      initials: 'JP',
+      avatarColor: '#63b3ed',
+      badgeClass: 'role-estudiante',
+      badgeText: 'Estudiante',
+      title: 'Mi Aprendizaje',
+      sub: 'Miercoles, 13 de Mayo 2026',
+      stats: [
+        { icon: bookIcon(), value: '3', label: 'Cursos Inscritos', trend: 'Activos', trendClass: 'trend-info', bar: '#63b3ed' },
+        { icon: taskIcon(), value: '2', label: 'Tareas Pendientes', trend: 'Esta semana', trendClass: 'trend-up', bar: '#f5a623' },
+        { icon: chartIcon(), value: '7.3', label: 'Mi Promedio', trend: 'Este periodo', trendClass: 'trend-up', bar: '#2dce89' },
+        { icon: calIcon(), value: '3', label: 'Dias Para Entrega', trend: 'Proxima tarea', trendClass: 'trend-info', bar: '#e74c3c' },
+      ],
+      nav: [
+        { id: 'dashboard', label: 'Mi Panel', icon: homeIcon() },
+        { id: 'cursos', label: 'Mis Cursos', icon: bookIcon() },
+        { id: 'tareas', label: 'Mis Tareas', icon: taskIcon(), badge: '2' },
+        { id: 'notas', label: 'Mis Notas', icon: chartIcon() },
+        { id: 'perfil', label: 'Mi Perfil', icon: profileIcon() },
+      ]
+    }
+  };
+
+  const COURSES = [
+    { title: 'Matematicas II', teacher: 'Prof. Maria Lopez', students: 24, modules: 6, progress: 65, color: '#1a2e44' },
+    { title: 'Fisica I', teacher: 'Prof. Carlos Ruiz', students: 18, modules: 4, progress: 40, color: '#2dce89' },
+    { title: 'Programacion Web', teacher: 'Prof. Ana Garcia', students: 31, modules: 8, progress: 80, color: '#f5a623' },
+    { title: 'Quimica General', teacher: 'Prof. Luis Torres', students: 22, modules: 5, progress: 30, color: '#e74c3c' },
+    { title: 'Calculo Integral', teacher: 'Prof. Maria Lopez', students: 15, modules: 7, progress: 55, color: '#8e44ad' },
+  ];
+
+  function homeIcon() { return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`; }
+  function usersIcon() { return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>`; }
+  function bookIcon() { return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>`; }
+  function taskIcon() { return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>`; }
+  function chartIcon() { return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>`; }
+  function profileIcon() { return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`; }
+  function calIcon() { return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`; }
+
+  function selectRole(el) {
+    document.querySelectorAll('.role-pill').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    currentRole = el.dataset.role;
+  }
+
+  function doLogin() {
+    const email = document.getElementById('loginEmail').value;
+    const pass = document.getElementById('loginPass').value;
+    if (!email || !pass) { alert('Por favor completa todos los campos.'); return; }
+    loadApp(currentRole);
+  }
+
+  function doLogout() {
+    document.getElementById('screen-app').classList.remove('active');
+    document.getElementById('screen-login').classList.add('active');
+    document.getElementById('loginEmail').value = '';
+    document.getElementById('loginPass').value = '';
+  }
+
+  function loadApp(role) {
+    const cfg = ROLES_CONFIG[role];
+    document.getElementById('screen-login').classList.remove('active');
+    document.getElementById('screen-app').classList.add('active');
+
+    document.getElementById('sidebarAvatar').textContent = cfg.initials;
+    document.getElementById('sidebarAvatar').style.background = cfg.avatarColor;
+    document.getElementById('sidebarName').textContent = cfg.name;
+    document.getElementById('sidebarRoleBadge').textContent = cfg.badgeText;
+    document.getElementById('sidebarRoleBadge').className = 'role-badge ' + cfg.badgeClass;
+    document.getElementById('topbarTitle').textContent = cfg.title;
+    document.getElementById('topbarSub').textContent = cfg.sub;
+    document.getElementById('topbarAvatar').textContent = cfg.initials;
+    document.getElementById('topbarAvatar').style.background = cfg.avatarColor;
+    document.getElementById('profileName').textContent = cfg.name;
+    document.getElementById('profileRole').textContent = cfg.badgeText;
+
+    renderNav(cfg.nav);
+    renderStats(cfg.stats);
+    renderCourses();
+    renderQuickCourses();
+    navigateTo('dashboard');
+  }
+
+  function renderNav(navItems) {
+    const nav = document.getElementById('sidebarNav');
+    nav.innerHTML = '<div class="nav-section-label">Menu Principal</div>';
+    navItems.forEach(item => {
+      const el = document.createElement('div');
+      el.className = 'nav-item';
+      el.dataset.page = item.id;
+      el.onclick = () => { navigateTo(item.id); closeSidebar(); };
+      el.innerHTML = item.icon + '<span>' + item.label + '</span>' + (item.badge ? '<span class="badge">' + item.badge + '</span>' : '');
+      nav.appendChild(el);
+    });
+  }
+
+  function renderStats(stats) {
+    const grid = document.querySelector('.stats-grid');
+    grid.innerHTML = '';
+    stats.forEach(s => {
+      const card = document.createElement('div');
+      card.className = 'stat-card';
+      card.innerHTML = `
+        <div class="sc-icon" style="background:${s.bar}18;">${s.icon.replace('currentColor', s.bar)}</div>
+        <div class="sc-value">${s.value}</div>
+        <div class="sc-label">${s.label}</div>
+        <div class="sc-trend ${s.trendClass}">${s.trend}</div>
+        <div class="sc-accent-bar" style="background:${s.bar};"></div>
+      `;
+      grid.appendChild(card);
+    });
+  }
+
+  function renderCourses() {
+    const grid = document.getElementById('courseGrid');
+    grid.innerHTML = '';
+    COURSES.forEach(c => {
+      const card = document.createElement('div');
+      card.className = 'course-card';
+      card.innerHTML = `
+        <div class="cc-banner" style="background:${c.color};">
+          <div class="cc-banner-pattern"></div>
+          <div class="cc-banner-icon">${bookIcon()}</div>
+        </div>
+        <div class="cc-content">
+          <h4>${c.title}</h4>
+          <div class="cc-meta">${c.teacher}</div>
+          <div style="display:flex;gap:12px;margin-top:10px;">
+            <div style="font-size:0.78rem;color:var(--muted);display:flex;align-items:center;gap:4px;">${usersIcon().replace('width="18"','width="13"').replace('height="18"','height="13"')} ${c.students} est.</div>
+            <div style="font-size:0.78rem;color:var(--muted);display:flex;align-items:center;gap:4px;">${bookIcon().replace('width="18"','width="13"').replace('height="18"','height="13"')} ${c.modules} mod.</div>
+          </div>
+          <div class="progress-bar-custom">
+            <div class="progress-fill" style="width:${c.progress}%;background:${c.color};"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;">
+            <span style="font-size:0.78rem;color:var(--muted);">Progreso: <strong style="color:var(--primary);">${c.progress}%</strong></span>
+            <button class="btn-ghost btn-sm-custom">Ver curso</button>
+          </div>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+  }
+
+  function renderQuickCourses() {
+    const list = document.getElementById('quickCourseList');
+    list.innerHTML = '';
+    COURSES.slice(0, 4).forEach(c => {
+      const item = document.createElement('div');
+      item.style.cssText = 'display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);';
+      item.innerHTML = `
+        <div style="width:36px;height:36px;border-radius:10px;background:${c.color};flex-shrink:0;display:flex;align-items:center;justify-content:center;">${bookIcon().replace('currentColor','rgba(255,255,255,0.9)').replace('width="18"','width="18"')}</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-weight:700;font-size:0.87rem;color:var(--primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.title}</div>
+          <div style="font-size:0.75rem;color:var(--muted);">${c.students} estudiantes</div>
+        </div>
+        <span style="font-size:0.78rem;font-weight:800;color:${c.color};">${c.progress}%</span>
+      `;
+      list.appendChild(item);
+    });
+  }
+
+  function navigateTo(pageId) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    const page = document.getElementById('page-' + pageId);
+    if (page) page.classList.add('active');
+    const navItem = document.querySelector(`.nav-item[data-page="${pageId}"]`);
+    if (navItem) navItem.classList.add('active');
+  }
+
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebarOverlay').classList.toggle('open');
+  }
+  function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebarOverlay').classList.remove('open');
+  }
+
+  function toggleNotif() {
+    document.getElementById('notifDropdown').classList.toggle('open');
+  }
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.topbar-btn') && !e.target.closest('.notif-dropdown')) {
+      document.getElementById('notifDropdown').classList.remove('open');
+    }
+  });
+
+  function openModal(id) { document.getElementById(id).classList.add('open'); }
+  function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+  function showRegisterModal() { openModal('modal-register'); }
+  document.querySelectorAll('.modal-overlay').forEach(m => {
+    m.addEventListener('click', function(e) {
+      if (e.target === this) this.classList.remove('open');
+    });
+  });
+</script>
+</body>
+</html>
